@@ -5,8 +5,6 @@ import java.util.Scanner;
 public class User {
     final Connection conn;
     final Scanner in;
-    private static final String userMenuMessage = "\n---User Menu---\n1. Search car\n2. Show loan record\n3. Return to main menu\nChoice: ";
-    private static final String userSearchCarMessage = "\n---Search Criterion---\n1. Call number\n2. Name\n3. Company\nChoice: ";
     int input, criteria;
     String keyword, uid;
 
@@ -17,9 +15,9 @@ public class User {
 
     public void start(){
         while(true) {
-            System.out.println(userMenuMessage);
+            System.out.println(Utils.userMenuMessage);
             while(true) {
-                input = Main.promptInt(this.in);
+                input = Utils.promptInt(this.in);
                 if (1 <= input && input <= 3) {
                     break;
                 } else {
@@ -28,11 +26,11 @@ public class User {
             }
 
             if (input == 1) {
-                System.out.print(userSearchCarMessage);
-                criteria = Main.promptInt(this.in);
+                System.out.print(Utils.userSearchCarMessage);
+                criteria = Utils.promptInt(this.in);
                 if (criteria == 1 || criteria == 2 || criteria == 3){
                     System.out.print("\nEnter search keyword: ");
-                    keyword = Main.promptLine(this.in);
+                    keyword = Utils.promptLine(this.in);
                     try {
                         searchCar(criteria, keyword);
                     } catch (SQLException e){
@@ -44,7 +42,7 @@ public class User {
                     System.out.println("\n[Error]: Invalid input");
             } else if (input == 2) {
                 System.out.print("\nEnter user id: ");
-                uid = Main.promptLine(this.in);
+                uid = Utils.promptLine(this.in);
                 try {
                     showLoan(uid);
                 } catch (SQLException e){

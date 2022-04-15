@@ -6,7 +6,6 @@ import java.util.Scanner;
 public class Manager {
     final Connection conn;
     final Scanner in;
-    private static final String managerMenuMessage = "\n---Manager Menu---\n1. Car renting\n2. Car returning\n3. List unreturned car\n4. Return to main menu\nChoice: ";
     String uid, callnum, start_date, end_date;
     int input, copynum;
 
@@ -16,9 +15,9 @@ public class Manager {
     }
     public void start() {
         while(true) {
-            System.out.println(managerMenuMessage);
+            System.out.println(Utils.managerMenuMessage);
             while(true) {
-                input = Main.promptInt(this.in);
+                input = Utils.promptInt(this.in);
                 if (1 <= input && input <= 4) {
                     break;
                 } else {
@@ -28,11 +27,11 @@ public class Manager {
 
             if (input == 1) {
                 System.out.print("\nEnter user id: ");
-                uid = Main.promptLine(this.in);
+                uid = Utils.promptLine(this.in);
                 System.out.print("Enter call number: ");
-                callnum = Main.promptLine(this.in);
+                callnum = Utils.promptLine(this.in);
                 System.out.print("Enter copy number: ");
-                copynum = Main.promptInt(this.in);
+                copynum = Utils.promptInt(this.in);
                 // Ask why this line is needed? -> scanner.nextLine();
                 try {
                     String date = currentDate();
@@ -44,11 +43,11 @@ public class Manager {
             }
             else if (input == 2) {
                 System.out.print("\nEnter user id: ");
-                uid = Main.promptLine(this.in);
+                uid = Utils.promptLine(this.in);
                 System.out.print("Enter call number: ");
-                callnum = Main.promptLine(this.in);
+                callnum = Utils.promptLine(this.in);
                 System.out.print("Enter copy number: ");
-                copynum = Main.promptInt(this.in);
+                copynum = Utils.promptInt(this.in);
                 try {
                     String date = currentDate();
                     returnCar(uid, callnum, copynum, date);
@@ -59,9 +58,9 @@ public class Manager {
             }
             else if (input == 3) {
                 System.out.print("\nEnter start date: ");
-                start_date = Main.promptLine(this.in);
+                start_date = Utils.promptLine(this.in);
                 System.out.print("Enter end date: ");
-                end_date = Main.promptLine(this.in);
+                end_date = Utils.promptLine(this.in);
                 try {
                     listUnreturned(start_date, end_date);
                 } catch (SQLException e) {

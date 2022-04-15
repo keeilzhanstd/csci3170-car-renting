@@ -1,33 +1,9 @@
 package com.company;
-import java.util.Scanner;
 import java.sql.*;
 
 
 //Used to establish connection with mysql, and begin the app functioning.
 public class Main {
-
-    public static int promptInt(Scanner in) {
-        int choice;
-        try {
-            choice = in.nextInt();
-            return choice;
-        } catch(Exception e) {
-            System.out.println("[Error]: Input is not a valid integer.");
-            System.exit(-1);
-        }
-        return -1;
-    }
-
-    public static String promptLine(Scanner in) {
-        try {
-            return in.nextLine();
-        } catch(Exception e) {
-            System.out.println("[Error]: Input is not a valid string.");
-            System.exit(-1);
-        }
-        return null;
-    }
-
     public static void main(String[] args) {
         // Firstly, need to connect to the database
         String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/group30";

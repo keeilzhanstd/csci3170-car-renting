@@ -16,7 +16,7 @@ public class Role {
 
     private int getInput() {
         System.out.println(RoleMessage);
-        return Main.promptInt(this.in);
+        return Utils.promptInt(this.in);
     }
 
     public void run() {

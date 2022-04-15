@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Admin {
     final Connection conn;
     final Scanner in;
-    private static final String adminMenuMessage = "\n---Admin Menu---\n1. Create table\n2. Delete table\n3. Load data\n4. Show number of record\n5. Return to main menu\nChoice: ";
+
     int input;
 
     public Admin(Connection conn, Scanner in) {
@@ -17,9 +17,9 @@ public class Admin {
     public void start() {
 
         while(true) {
-            System.out.println(adminMenuMessage);
+            System.out.println(Utils.adminMenuMessage);
             while(true) {
-                input = Main.promptInt(this.in);
+                input = Utils.promptInt(this.in);
                 if (1 <= input && input <= 5) {
                     break;
                 } else {

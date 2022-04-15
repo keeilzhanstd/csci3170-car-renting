@@ -71,22 +71,22 @@ public class Admin {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(sql);
             //Create USER
-            sql = "CREATE TABLE USER(uid varchar(12) primary key, name varchar(25) NOT NULL, age integer(2) NOT NULL, occupation varchar(20) NOT NULL, ucid integer(1) NOT NULL)";
+            sql = "CREATE TABLE USER(uid varchar(12) primary key, name varchar(25) NOT NULL, age integer(2) NOT NULL, occupation varchar(20) NOT NULL, ucid integer(1) NOT NULL, FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
             stmt.executeUpdate(sql);
             //Create CAR_CATEGORY
             sql = "CREATE TABLE CAR_CATEGORY(ccid integer(1) primary key, ccname varchar(20) NOT NULL)";
             stmt.executeUpdate(sql);
             //Create CAR
-            sql = "CREATE TABLE CAR(callnum varchar(8) primary key, name varchar(10) NOT NULL, manufacture varchar(10) NOT NULL, time_rent integer(2) NOT NULL, ccid integer(1) NOT NULL)";
+            sql = "CREATE TABLE CAR(callnum varchar(8) primary key, name varchar(10) NOT NULL, manufacture varchar(10) NOT NULL, time_rent integer(2) NOT NULL, ccid integer(1) NOT NULL, FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
             stmt.executeUpdate(sql);
             //Create COPY
-            sql = "CREATE TABLE COPY(callnum varchar(8), copynum integer(1) NOT NULL, PRIMARY KEY (callnum, copynum))";
+            sql = "CREATE TABLE COPY(callnum varchar(8), copynum integer(1) NOT NULL, PRIMARY KEY (callnum, copynum), FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
             stmt.executeUpdate(sql);
             //Create RENT
-            sql = "CREATE TABLE RENT(callnum varchar(8) NOT NULL, copynum integer(1) NOT NULL, uid varchar(12) NOT NULL, checkout varchar(10), return_date varchar(10), PRIMARY KEY (uid, callnum, copynum, checkout))";
+            sql = "CREATE TABLE RENT(callnum varchar(8) NOT NULL, copynum integer(1) NOT NULL, uid varchar(12) NOT NULL, checkout varchar(10), return_date varchar(10), PRIMARY KEY (uid, callnum, copynum, checkout), FOREIGN KEY (callnum, copynum) REFERENCES COPY (callnum, copynum), FOREIGN KEY (uid) REFERENCES USER (uid))";
             stmt.executeUpdate(sql);
             //Create PRODUCE
-            sql = "CREATE TABLE PRODUCE(cname varchar(25) NOT NULL, callnum varchar(8) NOT NULL, PRIMARY KEY (cname, callnum))";
+            sql = "CREATE TABLE PRODUCE(cname varchar(25) NOT NULL, callnum varchar(8) NOT NULL, PRIMARY KEY (cname, callnum), FOREIGN KEY (callnum) REFERENCES CAR (callnum))";
             stmt.executeUpdate(sql);
             // TEMP table for load data to COPY table and compute available copy of car in search car operation
             sql = "CREATE TABLE TEMP(callnum varchar(8) NOT NULL, numOfCopy int(1) NOT NULL);";
@@ -94,7 +94,7 @@ public class Admin {
     }
 
     private void deleteTable() throws SQLException{
-        String sql = "DROP TABLE IF EXISTS USER_CATEGORY, USER, CAR_CATEGORY, CAR, COPY, RENT, PRODUCE, TEMP";
+        String sql = "DROP TABLE IF EXISTS RENT, COPY, PRODUCE, TEMP, USER, USER_CATEGORY, CAR, CAR_CATEGORY";
         Statement stmt = conn.createStatement();
         stmt.executeUpdate(sql);
     }
@@ -110,8 +110,6 @@ public class Admin {
         sql = "LOAD DATA LOCAL INFILE '" + path + "/user.txt' INTO TABLE USER;";
         stmt.execute(sql);
         sql = "LOAD DATA LOCAL INFILE '" + path + "/car_category.txt' INTO TABLE CAR_CATEGORY;";
-        stmt.execute(sql);
-        sql = "LOAD DATA LOCAL INFILE '" + path + "/rent.txt' INTO TABLE RENT;";
         stmt.execute(sql);
 
         //separate date in car.txt into 3 tables CAR and COPY and PRODUCE
@@ -145,6 +143,9 @@ public class Admin {
                     pstmt.executeUpdate();
                 }
             }
+
+        sql = "LOAD DATA LOCAL INFILE '" + path + "/rent.txt' INTO TABLE RENT;";
+        stmt.execute(sql);
     }
 
     private void showNum() throws SQLException{

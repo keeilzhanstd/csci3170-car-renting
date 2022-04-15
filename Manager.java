@@ -95,7 +95,7 @@ public class Manager {
     private void rentCar(String uid, String callnum, int copynum, String date) throws SQLException {
         ResultSet resultSet;
         // check whether callnum and copynum exist
-        String sql = "SELECT * FROM COPY WHERE callnum = ? AND copynum = ?";
+        String sql = "SELECT * FROM RENT WHERE callnum = ? AND copynum = ? AND return_date = 'NULL' ";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, callnum);
         stmt.setInt(2, copynum);
@@ -118,16 +118,21 @@ public class Manager {
                 // if result is empty, car is available (no NULL value in return_date)
                 // insert new rent record
                 sql = "INSERT INTO RENT (callnum, copynum, uid, checkout, return_date) VALUES (?, ?, ?, ?, 'NULL')";
-                stmt = conn.prepareStatement(sql);
-                stmt.setString(1, callnum);
-                stmt.setInt(2, copynum);
-                stmt.setString(3, uid);
-                stmt.setString(4, date);
-                stmt.executeUpdate();
+                try{
+                    stmt = conn.prepareStatement(sql);
+                    stmt.setString(1, callnum);
+                    stmt.setInt(2, copynum);
+                    stmt.setString(3, uid);
+                    stmt.setString(4, date);
+                    stmt.executeUpdate();
+                }catch(SQLException e){
+                    // if data cannot be inserted, either user id or callnum or copynum fail the foreign key constraint
+                    System.out.println("\n[Error]: Car or User does not exist. Renting failed");
+                    return;
+                }
                 System.out.println("\n[Message]: Car available. Renting succeeded");
             }
-            else
-                // if car not available
+            else            // if car not available
                 System.out.println("\n[Message]: Car not available. Renting failed.");
 
         }

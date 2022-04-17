@@ -126,7 +126,6 @@ public class Manager {
             }
         }
 
-        System.out.println(currentNumberOfBorrowedCars + " | " + maximumNumberAllowed);
         if(currentNumberOfBorrowedCars >= maximumNumberAllowed){
             System.out.println("\n[Error]: User " + uid + " reached maximum capacity of cars available to borrow for his user category.");
             return;

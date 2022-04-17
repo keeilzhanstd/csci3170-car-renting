@@ -22,11 +22,18 @@ public class Role {
     public void run() {
         int input;
         while((input = getInput()) != 4) {
-            switch (input) {
-                case 1 -> (new Admin(conn, in)).start();
-                case 2 -> (new Manager(conn, in)).start();
-                case 3 -> (new User(conn, in)).start();
-                default -> System.out.println("[ERROR] Invalid input! Please retry.");
+            switch(input) {
+                case 1:
+                    (new Admin(conn, in)).start();
+                    break;
+                case 2:
+                    (new User(conn, in)).start();
+                    break;
+                case 3:
+                    (new Manager(conn, in)).start();
+                    break;
+                default:
+                    System.out.println("[ERROR] Invalid input! Please retry.");
             }
         }
     }

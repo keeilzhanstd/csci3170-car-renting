@@ -101,7 +101,7 @@ public class Manager {
         stmtcount.setString(1, uid);
         count = stmtcount.executeQuery();
         if(!count.isBeforeFirst()) {
-            System.out.println("\n[Message]: No records found");
+            System.out.println("\n[DEBUG]: " + uid + "count from rent found nothing...");
         }
         else{
             while(count.next()){
@@ -117,8 +117,8 @@ public class Manager {
         PreparedStatement stmtMax = conn.prepareStatement(sqlMax);
         stmtMax.setString(1, uid);
         maxForUser = stmtMax.executeQuery();
-        if(!count.isBeforeFirst()) {
-            System.out.println("\n[Message]: No records found");
+        if(!maxForUser.isBeforeFirst()) {
+            System.out.println("\n[DEBUG]: " + uid + "max for user found nothing.");
         }
         else{
             while(maxForUser.next()){
@@ -126,6 +126,7 @@ public class Manager {
             }
         }
 
+        System.out.println(currentNumberOfBorrowedCars + " | " + maximumNumberAllowed);
         if(currentNumberOfBorrowedCars >= maximumNumberAllowed){
             System.out.println("\n[Error]: User " + uid + " reached maximum capacity of cars available to borrow for his user category.");
             return;

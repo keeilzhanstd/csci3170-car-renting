@@ -96,7 +96,7 @@ public class Manager {
 
         ResultSet count = null;
         // query to check whether car available by return_date
-        String sqlCount = "SELECT COUNT(*) from RENT where uid = ?";
+        String sqlCount = "SELECT COUNT(*) from RENT where uid = ? AND return_date = 'NULL'";
         PreparedStatement stmtcount = conn.prepareStatement(sqlCount);
         stmtcount.setString(1, uid);
         count = stmtcount.executeQuery();
@@ -110,7 +110,6 @@ public class Manager {
         }
 
         //Get max number of cars allowed for the user.
-
         ResultSet maxForUser = null;
         // query to check whether car available by return_date
         String sqlMax = "SELECT UC.max FROM USER_CATEGORY AS UC, USER as U WHERE U.uid = ? AND UC.ucid = U.ucid";
@@ -125,9 +124,8 @@ public class Manager {
                 maximumNumberAllowed = maxForUser.getInt(1);
             }
         }
-
         if(currentNumberOfBorrowedCars >= maximumNumberAllowed){
-            System.out.println("\n[Error]: User " + uid + " reached maximum capacity of cars available to borrow for his user category.");
+            System.out.println("\n[Error]: " + uid + " reached maximum capacity of cars available to borrow for his user category.");
             return;
         }
 

@@ -7,7 +7,6 @@ import java.util.Scanner;
 public class Role {
     final Connection conn;
     final Scanner in;
-    private static final String RoleMessage = "\nWelcome to car renting system!\n---Main Menu---\n1. Admin\n2. User\n3. Manager\n4. Exit\nChoice: ";
 
     public Role(Connection conn) {
         this.in = new Scanner(System.in);
@@ -15,7 +14,7 @@ public class Role {
     }
 
     private int getInput() {
-        System.out.println(RoleMessage);
+        System.out.print(Utils.RoleMessage);
         return Utils.promptInt(this.in);
     }
 
@@ -33,7 +32,7 @@ public class Role {
                     (new Manager(conn, in)).start();
                     break;
                 default:
-                    System.out.println("[ERROR] Invalid input! Please retry.");
+                    System.out.println("[ERROR] Invalid input! Choose between [1, 4].");
             }
         }
     }

@@ -17,13 +17,13 @@ public class Admin {
     public void start() {
 
         while(true) {
-            System.out.println(Utils.adminMenuMessage);
+            System.out.print(Utils.adminMenuMessage);
             while(true) {
                 input = Utils.promptInt(this.in);
                 if (1 <= input && input <= 5) {
                     break;
                 } else {
-                    System.out.println("[ERROR]: Invalid input.");
+                    System.out.print("[ERROR]: Choose between [1, 5]\n Choice: ");
                 }
             }
 
@@ -32,8 +32,7 @@ public class Admin {
                     createTable();
                     System.out.println("[Message]: Tables created");
                 } catch (SQLException e) {
-                    System.out.println("[ERROR]: Tables already exist");
-                    System.exit(1);
+                    System.out.println("[ERROR]: " + e);
                 }
             } else if (input == 2) {
                 try {
@@ -41,7 +40,6 @@ public class Admin {
                     System.out.println("\n[Message]: Tables deleted");
                 } catch (SQLException e) {
                     System.out.println("[ERROR]: " + e);
-                    System.exit(1);
                 }
             } else if (input == 3) {
                 try {
@@ -49,14 +47,12 @@ public class Admin {
                     System.out.println("\n[Message]: Data loaded");
                 } catch (SQLException e){
                     System.out.println("[ERROR]: " + e);
-                    System.exit(1);
                 }
             } else if (input == 4) {
                 try {
                     showNum();
                 } catch(SQLException e) {
-                    System.out.println("[ERROR]: Cannot get size of tables. Check if tables exist.");
-                    System.exit(1);
+                    System.out.println("[ERROR]: Cannot get size of tables. Check if tables exist. Info: " + e);
                 }
             } else {
                 break;
@@ -66,31 +62,71 @@ public class Admin {
 
 
     private void createTable() throws SQLException{
-            //Create USER_CATEGORY
-            String sql = "CREATE TABLE USER_CATEGORY(ucid integer(1) primary key, max integer(1) NOT NULL, period integer(2) NOT NULL)";
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(sql);
-            //Create USER
-            sql = "CREATE TABLE USER(uid varchar(12) primary key, name varchar(25) NOT NULL, age integer(2) NOT NULL, occupation varchar(20) NOT NULL, ucid integer(1) NOT NULL, FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
-            stmt.executeUpdate(sql);
-            //Create CAR_CATEGORY
-            sql = "CREATE TABLE CAR_CATEGORY(ccid integer(1) primary key, ccname varchar(20) NOT NULL)";
-            stmt.executeUpdate(sql);
-            //Create CAR
-            sql = "CREATE TABLE CAR(callnum varchar(8) primary key, name varchar(10) NOT NULL, manufacture varchar(10) NOT NULL, time_rent integer(2) NOT NULL, ccid integer(1) NOT NULL, FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
-            stmt.executeUpdate(sql);
-            //Create COPY
-            sql = "CREATE TABLE COPY(callnum varchar(8), copynum integer(1) NOT NULL, PRIMARY KEY (callnum, copynum), FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid))";
-            stmt.executeUpdate(sql);
-            //Create RENT
-            sql = "CREATE TABLE RENT(callnum varchar(8) NOT NULL, copynum integer(1) NOT NULL, uid varchar(12) NOT NULL, checkout varchar(10), return_date varchar(10), PRIMARY KEY (uid, callnum, copynum, checkout), FOREIGN KEY (callnum, copynum) REFERENCES COPY (callnum, copynum), FOREIGN KEY (uid) REFERENCES USER (uid))";
-            stmt.executeUpdate(sql);
-            //Create PRODUCE
-            sql = "CREATE TABLE PRODUCE(cname varchar(25) NOT NULL, callnum varchar(8) NOT NULL, PRIMARY KEY (cname, callnum), FOREIGN KEY (callnum) REFERENCES CAR (callnum))";
-            stmt.executeUpdate(sql);
-            // TEMP table for load data to COPY table and compute available copy of car in search car operation
-            sql = "CREATE TABLE TEMP(callnum varchar(8) NOT NULL, numOfCopy int(1) NOT NULL);";
-            stmt.execute(sql);
+        String sql = "CREATE TABLE USER_CATEGORY(" +
+                "ucid integer(1) primary key, " +
+                "max integer(1) NOT NULL, " +
+                "period integer(2) NOT NULL" +
+                ")";
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE USER(" +
+                "uid varchar(12) primary key, " +
+                "name varchar(25) NOT NULL, " +
+                "age integer(2) NOT NULL, " +
+                "occupation varchar(20) NOT NULL, " +
+                "ucid integer(1) NOT NULL, " +
+                "FOREIGN KEY (ucid) REFERENCES USER_CATEGORY (ucid)" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE CAR_CATEGORY(" +
+                "ccid integer(1) primary key, " +
+                "ccname varchar(20) NOT NULL" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE CAR(" +
+                "callnum varchar(8) primary key, " +
+                "name varchar(10) NOT NULL, " +
+                "manufacture varchar(10) NOT NULL, " +
+                "time_rent integer(2) NOT NULL, " +
+                "ccid integer(1) NOT NULL, " +
+                "FOREIGN KEY (ccid) REFERENCES CAR_CATEGORY (ccid)" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE COPY(" +
+                "callnum varchar(8), " +
+                "copynum integer(1) NOT NULL, " +
+                "PRIMARY KEY (callnum, copynum), " +
+                "FOREIGN KEY (callnum) REFERENCES CAR (callnum)" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE RENT(" +
+                "callnum varchar(8) NOT NULL, " +
+                "copynum integer(1) NOT NULL, " +
+                "uid varchar(12) NOT NULL, " +
+                "checkout varchar(10), " +
+                "return_date varchar(10), " +
+                "PRIMARY KEY (uid, callnum, copynum, checkout), " +
+                "FOREIGN KEY (callnum, copynum) REFERENCES COPY (callnum, copynum), " +
+                "FOREIGN KEY (uid) REFERENCES USER (uid)" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        sql = "CREATE TABLE PRODUCE(" +
+                "cname varchar(25) NOT NULL, " +
+                "callnum varchar(8) NOT NULL, " +
+                "PRIMARY KEY (cname, callnum), " +
+                "FOREIGN KEY (callnum) REFERENCES CAR (callnum)" +
+                ")";
+        stmt.executeUpdate(sql);
+
+        // TEMP table for load data to COPY table and compute available copy of car in search car operation
+        sql = "CREATE TABLE TEMP(callnum varchar(8) NOT NULL, numOfCopy int(1) NOT NULL);";
+        stmt.execute(sql);
     }
 
     private void deleteTable() throws SQLException{
@@ -101,7 +137,7 @@ public class Admin {
 
     private void loadData() throws SQLException{
 
-        System.out.println("Enter the path to folder");
+        System.out.print("Enter the path to folder: ");
         String path = in.next();
 
         Statement stmt = conn.createStatement();

@@ -15,13 +15,13 @@ public class Manager {
     }
     public void start() {
         while(true) {
-            System.out.println(Utils.managerMenuMessage);
+            System.out.print(Utils.managerMenuMessage);
             while(true) {
                 input = Utils.promptInt(this.in);
                 if (1 <= input && input <= 4) {
                     break;
                 } else {
-                    System.out.println("[ERROR] Invalid input.");
+                    System.out.print("[ERROR] Invalid input. Choose between [1, 4]\n Choice: ");
                 }
             }
 
@@ -38,7 +38,6 @@ public class Manager {
                     rentCar(uid, callnum, copynum, date);
                 } catch (SQLException e) {
                     System.out.println("[ERROR]: " + e);
-                    System.exit(1);
                 }
             }
             else if (input == 2) {
@@ -53,19 +52,17 @@ public class Manager {
                     returnCar(uid, callnum, copynum, date);
                 } catch (SQLException e) {
                     System.out.println("[ERROR]: " + e);
-                    System.exit(1);
                 }
             }
             else if (input == 3) {
-                System.out.print("\nEnter start date: ");
+                System.out.print("\nEnter start date [yyyy-mm-dd]: ");
                 start_date = Utils.promptLine(this.in);
-                System.out.print("Enter end date: ");
+                System.out.print("Enter end date [yyyy-mm-dd]: ");
                 end_date = Utils.promptLine(this.in);
                 try {
                     listUnreturned(start_date, end_date);
                 } catch (SQLException e) {
                     System.out.println("[ERROR]: " + e);
-                    System.exit(1);
                 }
             }
             else if (input == 4) {
@@ -91,50 +88,79 @@ public class Manager {
         return date;
     }
 
-    private void rentCar(String uid, String callnum, int copynum, String date) throws SQLException {
-        ResultSet resultSet;
-        // check whether callnum and copynum exist
-        String sql = "SELECT * FROM RENT WHERE callnum = ? AND copynum = ? AND return_date = 'NULL' ";
+    private void rentCar( String uid, String callnum, int copynum, String date) throws SQLException {
+
+
+        int currentNumberOfBorrowedCars = 0;
+        int maximumNumberAllowed = 0;
+
+        ResultSet count = null;
+        // query to check whether car available by return_date
+        String sqlCount = "SELECT COUNT(*) from RENT where uid = ?";
+        PreparedStatement stmtcount = conn.prepareStatement(sqlCount);
+        stmtcount.setString(1, uid);
+        count = stmtcount.executeQuery();
+        if(!count.isBeforeFirst()) {
+            System.out.println("\n[Message]: No records found");
+        }
+        else{
+            while(count.next()){
+                currentNumberOfBorrowedCars = count.getInt(1);
+            }
+        }
+
+        //Get max number of cars allowed for the user.
+
+        ResultSet maxForUser = null;
+        // query to check whether car available by return_date
+        String sqlMax = "SELECT UC.max FROM USER_CATEGORY AS UC, USER as U WHERE U.uid = ? AND UC.ucid = U.ucid";
+        PreparedStatement stmtMax = conn.prepareStatement(sqlMax);
+        stmtMax.setString(1, uid);
+        maxForUser = stmtMax.executeQuery();
+        if(!count.isBeforeFirst()) {
+            System.out.println("\n[Message]: No records found");
+        }
+        else{
+            while(maxForUser.next()){
+                maximumNumberAllowed = maxForUser.getInt(1);
+            }
+        }
+
+        if(currentNumberOfBorrowedCars >= maximumNumberAllowed){
+            System.out.println("\n[Error]: User " + uid + " reached maximum capacity of cars available to borrow for his user category.");
+            return;
+        }
+
+        ResultSet resultSet = null;
+        // query to check whether car available by return_date
+        String sql = "SELECT * " +
+                "FROM RENT " +
+                "WHERE callnum = ? AND copynum = ? AND return_date = 'NULL'";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, callnum);
         stmt.setInt(2, copynum);
         resultSet = stmt.executeQuery();
 
-        if(!resultSet.isBeforeFirst()) {
-            // if result is empty, car not exist
-            System.out.println("\n[Message]: Car not exist. Renting failed");
-        }
-        else {
-            // if car exist, check availability
-            // query to check whether car available by return_date
-            sql = "SELECT * FROM RENT WHERE callnum = ? AND copynum = ? AND return_date = 'NULL' ";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, callnum);
-            stmt.setInt(2, copynum);
-            resultSet = stmt.executeQuery();
-
-            if(!resultSet.isBeforeFirst()){
-                // if result is empty, car is available (no NULL value in return_date)
-                // insert new rent record
-                sql = "INSERT INTO RENT (callnum, copynum, uid, checkout, return_date) VALUES (?, ?, ?, ?, 'NULL')";
-                try{
-                    stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, callnum);
-                    stmt.setInt(2, copynum);
-                    stmt.setString(3, uid);
-                    stmt.setString(4, date);
-                    stmt.executeUpdate();
-                }catch(SQLException e){
-                    // if data cannot be inserted, either user id or callnum or copynum fail the foreign key constraint
-                    System.out.println("\n[Error]: Car or User does not exist. Renting failed");
-                    return;
-                }
-                System.out.println("\n[Message]: Car available. Renting succeeded");
+        if(!resultSet.isBeforeFirst()){     // if result is empty, car is available (no NULL value in return_date)
+            // insert new rent record
+            sql = "INSERT INTO RENT (callnum, copynum, uid, checkout, return_date) VALUES (?, ?, ?, ?, 'NULL')";
+            try{
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, callnum);
+                stmt.setInt(2, copynum);
+                stmt.setString(3, uid);
+                stmt.setString(4, date);
+                stmt.executeUpdate();
+            }catch(SQLException e){
+                // if data cannot be inserted, either user id or callnum or copynum fail the foreign key constraint
+                System.out.println("\n[Error]: Car or User does not exist. Renting failed");
+                return;
             }
-            else            // if car not available
-                System.out.println("\n[Message]: Car not available. Renting failed.");
-
+            System.out.println("\n[Message]: Car available. Renting succeeded");
         }
+        else            // if car not available
+            System.out.println("\n[Message]: Car not available. Renting failed.");
+
     }
 
     private void returnCar(String uid, String callnum, int copynum, String date) throws SQLException {
